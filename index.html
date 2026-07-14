@@ -480,15 +480,23 @@
             <div class="balance-amount num-font" id="saldoTotal">$&nbsp;155.957</div>
             <div style="font-size: 12px; opacity: 0.8;">Efectivo + Digital</div>
         </div>
-        <div class="balance-card">
-            <div class="balance-label">💵 Efectivo</div>
+        <div class="balance-card" id="card-efectivo">
+            <div class="balance-label" style="display:flex; align-items:center; justify-content:space-between;">
+                <span>💵 Efectivo</span>
+                <i data-lucide="chevron-down" id="chevron-efectivo" style="width:16px; cursor:pointer; display:none;" onclick="toggleCuentaBreakdown('Efectivo')"></i>
+            </div>
             <div class="balance-amount num-font" id="saldoEfectivo">$&nbsp;35.350</div>
             <div style="font-size: 12px; color: var(--text-secondary); margin-top: 5px;">Disponible en efectivo</div>
+            <div id="breakdown-efectivo" style="display:none; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border);"></div>
         </div>
-        <div class="balance-card">
-            <div class="balance-label">💳 Digital</div>
+        <div class="balance-card" id="card-digital">
+            <div class="balance-label" style="display:flex; align-items:center; justify-content:space-between;">
+                <span>💳 Digital</span>
+                <i data-lucide="chevron-down" id="chevron-digital" style="width:16px; cursor:pointer; display:none;" onclick="toggleCuentaBreakdown('Digital')"></i>
+            </div>
             <div class="balance-amount num-font" id="saldoDigital">$&nbsp;120.607</div>
             <div style="font-size: 12px; color: var(--text-secondary); margin-top: 5px;">Tarjetas y transferencias</div>
+            <div id="breakdown-digital" style="display:none; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border);"></div>
         </div>
     </div>
 
@@ -503,7 +511,10 @@
     <div id="tab-registro" class="tab-content">
         
         <div id="prestamos-dashboard" style="display: block; margin-bottom: 24px;">
-            <h3 style="font-size: 16px; color: var(--text-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="clock" aria-hidden="true" class="lucide lucide-clock"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg> Cuentas Abiertas (Me deben)</h3>
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+                <h3 style="font-size: 16px; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 8px;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="clock" aria-hidden="true" class="lucide lucide-clock"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg> Cuentas Abiertas (Me deben)</h3>
+                <button class="btn btn-secondary" style="padding: 8px 14px; font-size: 13px;" onclick="abrirModalNuevaDeuda()"><i data-lucide="plus" style="width:14px;"></i> Me deben (sin préstamo)</button>
+            </div>
             <div id="prestamos-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px;"></div>
         </div>
 
@@ -685,6 +696,17 @@
             </div>
             <div class="pill-container" id="settings-tag-list"></div>
         </div>
+
+        <div class="glass-panel">
+            <h2 class="section-title" style="margin-bottom: 20px;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="wallet" aria-hidden="true" class="lucide lucide-wallet"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"></path><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path></svg> Gestión de Cuentas (Efectivo / Digital)</h2>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">Crea cuentas para saber exactamente dónde está tu dinero (ej: Billetera, Caja fuerte, Bancolombia, Nequi). Aparecerán como opción al registrar movimientos y como desplegable en las tarjetas de saldo.</p>
+            <div class="form-grid" style="align-items: end;">
+                <div class="form-group"><label>Nombre de la Cuenta</label><input type="text" id="new-cuenta-name" placeholder="Ej: Bancolombia"></div>
+                <div class="form-group"><label>Tipo</label><select id="new-cuenta-tipo"><option value="Efectivo">💵 Efectivo</option><option value="Digital">💳 Digital</option></select></div>
+                <button class="btn btn-secondary" onclick="addCuenta()">Crear Cuenta</button>
+            </div>
+            <div class="pill-container" id="settings-cuentas-list"></div>
+        </div>
     </div>
 </div>
 
@@ -851,6 +873,58 @@
     </div>
 </div>
 
+<div id="modal-nueva-deuda" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Me deben (sin préstamo)</h3>
+            <button class="btn-icon" onclick="closeModal('modal-nueva-deuda')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x" aria-hidden="true" class="lucide lucide-x"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+        </div>
+        <p style="margin-bottom: 20px; color: var(--text-secondary); font-size: 13px;">Usa esto cuando alguien te deba dinero sin que tú hayas prestado nada (ej: por un trabajo, una venta, etc). Este registro <strong>no descuenta ni afecta tu saldo actual</strong>, es solo un recordatorio de que te deben.</p>
+
+        <div class="form-group" style="margin-bottom: 15px;">
+            <label>Persona</label>
+            <select id="deuda-tag-id"></select>
+        </div>
+        <div class="form-group" style="margin-bottom: 15px;">
+            <label>¿Por qué te debe? (descripción)</label>
+            <input type="text" id="deuda-desc" placeholder="Ej: Trabajo de diseño">
+        </div>
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label>Monto que te deben ($)</label>
+            <input type="number" id="deuda-monto" class="num-font" min="0" step="0.01">
+        </div>
+        <button class="btn btn-primary" style="width: 100%;" onclick="crearMeDeben()">Guardar Registro</button>
+    </div>
+</div>
+
+<div id="modal-cobrar" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Cobrar Deuda a Favor</h3>
+            <button class="btn-icon" onclick="closeModal('modal-cobrar')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x" aria-hidden="true" class="lucide lucide-x"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+        </div>
+        <input type="hidden" id="cobrar-tag-id">
+        <input type="hidden" id="cobrar-max">
+        <p id="cobrar-desc" style="margin-bottom: 20px; color: var(--text-secondary);"></p>
+
+        <div class="form-group" style="margin-bottom: 15px;">
+            <label>Monto que te pagaron ($)</label>
+            <input type="number" id="cobrar-monto" class="num-font" min="0" step="0.01">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label>¿Por dónde te pagaron?</label>
+            <select id="cobrar-metodo">
+                <option value="Efectivo">Efectivo</option>
+                <option value="Nequi">Nequi</option>
+                <option value="Transferencia">Transferencia</option>
+                <option value="Daviplata">Daviplata</option>
+            </select>
+        </div>
+        <button class="btn btn-primary" style="width: 100%; background: var(--success);" onclick="procesarCobrarMeDeben()">Registrar Cobro</button>
+    </div>
+</div>
+
 <div id="modal-mes-detalle" class="modal-overlay">
     <div class="modal-content" style="max-width: 700px;">
         <div class="modal-header" style="border-bottom: 1px solid var(--border); padding-bottom: 15px;">
@@ -1006,7 +1080,9 @@
   "presupuestos": [],
   "saldoInicialDigital": 0,
   "saldoInicialEfectivo": 0,
-  "transacciones": []
+  "transacciones": [],
+  "cuentas": [],
+  "meDeben": []
 };
     // --- FIN DATOS ---
 
@@ -1073,6 +1149,8 @@
         appState.presupuestos  = firebaseToArray(appState.presupuestos);
         appState.metas         = firebaseToArray(appState.metas);
         appState.transacciones = firebaseToArray(appState.transacciones);
+        appState.cuentas       = firebaseToArray(appState.cuentas);
+        appState.meDeben       = firebaseToArray(appState.meDeben);
         appState.transacciones.forEach(t => { if (!Array.isArray(t.tagIds)) t.tagIds = firebaseToArray(t.tagIds); });
         appState.metas.forEach(m => { if (!Array.isArray(m.aportes)) m.aportes = firebaseToArray(m.aportes); });
         localStorage.setItem('finanzas_papa_v1', JSON.stringify(appState));
@@ -1122,7 +1200,7 @@
     function descargarAppHTML() {
         const clone = document.documentElement.cloneNode(true);
         
-        const cleanIds = ['#tx-list', '#budget-container', '#goals-list', '#summary-table-body', '#prestamos-list', '#summary-cards-container', '#settings-cat-list', '#settings-tag-list'];
+        const cleanIds = ['#tx-list', '#budget-container', '#goals-list', '#summary-table-body', '#prestamos-list', '#summary-cards-container', '#settings-cat-list', '#settings-tag-list', '#settings-cuentas-list'];
         cleanIds.forEach(id => {
             const el = clone.querySelector(id);
             if (el) el.innerHTML = '';
@@ -1180,17 +1258,73 @@
     }
 
     function calculateSaldos() {
+        const cuentas = appState.cuentas || [];
+        const cuentasEfectivo = cuentas.filter(c => c.tipo === 'Efectivo');
+        const cuentasDigital = cuentas.filter(c => c.tipo === 'Digital');
+        const nombresEfectivo = new Set(cuentasEfectivo.map(c => c.nombre));
+
         let ef = appState.saldoInicialEfectivo;
         let dig = appState.saldoInicialDigital;
-        
+
+        // Efectivo asignado a una cuenta específica (ej: Billetera, Caja fuerte)
+        const efPorCuenta = {};
+        cuentasEfectivo.forEach(c => efPorCuenta[c.nombre] = 0);
+        // Digital asignado a una cuenta específica (ej: Bancolombia, Nequi)
+        const digPorCuenta = {};
+        cuentasDigital.forEach(c => digPorCuenta[c.nombre] = 0);
+
         appState.transacciones.forEach(t => {
             const val = t.tipo === 'Ingreso' ? t.monto : -t.monto;
-            if(t.metodo === 'Efectivo') ef += val;
-            else dig += val; 
+            const esEfectivo = t.metodo === 'Efectivo' || nombresEfectivo.has(t.metodo);
+
+            if (esEfectivo) {
+                ef += val;
+                if (efPorCuenta.hasOwnProperty(t.metodo)) efPorCuenta[t.metodo] += val;
+            } else {
+                dig += val;
+                if (digPorCuenta.hasOwnProperty(t.metodo)) digPorCuenta[t.metodo] += val;
+            }
         });
+
         document.getElementById('saldoEfectivo').textContent = formatMoney(ef);
         document.getElementById('saldoDigital').textContent = formatMoney(dig);
         document.getElementById('saldoTotal').textContent = formatMoney(ef + dig);
+
+        renderCuentaBreakdown('efectivo', ef, appState.saldoInicialEfectivo, efPorCuenta, cuentasEfectivo);
+        renderCuentaBreakdown('digital', dig, appState.saldoInicialDigital, digPorCuenta, cuentasDigital);
+    }
+
+    function renderCuentaBreakdown(prefijo, total, saldoInicial, porCuenta, cuentasDeEsteTipo) {
+        const chevron = document.getElementById(`chevron-${prefijo}`);
+        const container = document.getElementById(`breakdown-${prefijo}`);
+
+        if (cuentasDeEsteTipo.length === 0) {
+            chevron.style.display = 'none';
+            container.style.display = 'none';
+            container.innerHTML = '';
+            return;
+        }
+
+        chevron.style.display = 'block';
+
+        // Lo que no quedó asignado a ninguna cuenta creada, para que la suma siempre cuadre con el total.
+        const sinAsignar = total - Object.values(porCuenta).reduce((a, b) => a + b, 0);
+
+        let html = cuentasDeEsteTipo.map(c => `
+            <div style="display:flex; justify-content:space-between; font-size: 13px; padding: 4px 0;">
+                <span style="color: var(--text-secondary);">${c.nombre}</span>
+                <strong class="num-font">${formatMoney(porCuenta[c.nombre] || 0)}</strong>
+            </div>
+        `).join('');
+
+        html += `
+            <div style="display:flex; justify-content:space-between; font-size: 13px; padding: 4px 0; color: var(--text-muted);">
+                <span>Sin asignar</span>
+                <strong class="num-font">${formatMoney(sinAsignar)}</strong>
+            </div>
+        `;
+
+        container.innerHTML = html;
     }
 
     function selectTipo(tipo) {
@@ -1209,7 +1343,8 @@
             return;
         }
 
-        const txsPrestado = appState.transacciones.filter(t => t.catId === catPrestado.id);
+        // Excluimos los cobros de "me deben" para que no se mezclen con los préstamos reales.
+        const txsPrestado = appState.transacciones.filter(t => t.catId === catPrestado.id && !t.esCobroMeDeben);
         
         const grupos = {};
         txsPrestado.forEach(t => {
@@ -1222,38 +1357,57 @@
             grupos[tagId].txs.push(t);
         });
 
+        // Deudas a favor que NO son préstamos (Función "Me deben")
+        const meDeben = firebaseToArray(appState.meDeben);
+        const gruposMeDeben = {};
+        meDeben.forEach(d => {
+            const pendiente = d.monto - (d.abonado || 0);
+            if (pendiente <= 0) return;
+            if (!gruposMeDeben[d.tagId]) gruposMeDeben[d.tagId] = { pendiente: 0, items: [] };
+            gruposMeDeben[d.tagId].pendiente += pendiente;
+            gruposMeDeben[d.tagId].items.push(d);
+        });
+
+        const allTagIds = new Set([...Object.keys(grupos), ...Object.keys(gruposMeDeben).map(String)]);
+
         let prestamosHtml = '';
 
-        for (const tagId in grupos) {
-            const g = grupos[tagId];
+        allTagIds.forEach(tagId => {
+            const g = grupos[tagId] || { prestado: 0, abonado: 0, txs: [] };
+            const gm = gruposMeDeben[tagId] || { pendiente: 0, items: [] };
             const deudaPendiente = g.prestado - g.abonado;
+            const meDebenPendiente = gm.pendiente;
+
+            if (deudaPendiente <= 0 && meDebenPendiente <= 0) return;
+
+            let tagName = '⚠️ Sin Etiqueta Asignada';
+            let validTagId = null;
+
+            if (tagId !== 'huerfano') {
+                const tagObj = appState.etiquetas.find(t => t.id == tagId);
+                if (tagObj) {
+                    tagName = tagObj.nombre;
+                    validTagId = tagObj.id;
+                }
+            }
+
+            let bloqueHtml = `
+                <div class="prestamo-card">
+                    <div class="prestamo-header">
+                        <div style="font-size: 16px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 8px; text-transform: capitalize;">
+                            <i data-lucide="user" style="width: 16px; color: var(--accent-primary);"></i> ${tagName}
+                        </div>
+                        <span class="prestamo-badge badge-pendiente">Pendiente</span>
+                    </div>
+            `;
 
             if (deudaPendiente > 0) {
-                let tagName = '⚠️ Sin Etiqueta Asignada';
-                let validTagId = null;
-
-                if (tagId !== 'huerfano') {
-                    const tagObj = appState.etiquetas.find(t => t.id == tagId);
-                    if (tagObj) {
-                        tagName = tagObj.nombre;
-                        validTagId = tagObj.id;
-                    }
-                }
-
                 const txsRecientes = g.txs.sort((a,b) => new Date(b.fecha) - new Date(a.fecha)).slice(0, 3);
-
-                prestamosHtml += `
-                    <div class="prestamo-card">
-                        <div class="prestamo-header">
-                            <div style="font-size: 16px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 8px; text-transform: capitalize;">
-                                <i data-lucide="user" style="width: 16px; color: var(--accent-primary);"></i> ${tagName}
-                            </div>
-                            <span class="prestamo-badge badge-pendiente">Pendiente</span>
-                        </div>
-                        <div class="num-font" style="font-size: 24px; color: var(--danger); margin: 8px 0;">
-                            ${formatMoney(deudaPendiente)}
-                        </div>
-                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px; border-top: 1px dashed var(--border); padding-top: 8px;">
+                bloqueHtml += `
+                    <div style="border-top: 1px dashed var(--border); padding-top: 10px; margin-top: 4px;">
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Le presté</div>
+                        <div class="num-font" style="font-size: 22px; color: var(--danger); margin-bottom: 6px;">${formatMoney(deudaPendiente)}</div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">
                             ${txsRecientes.map(t => `
                                 <div style="display:flex; justify-content:space-between; margin-bottom: 4px;">
                                     <span>${formatDateForDisplay(t.fecha)} (${t.tipo === 'Gasto' ? 'Préstamo' : 'Abono'})</span>
@@ -1262,16 +1416,40 @@
                             `).join('')}
                         </div>
                         ${validTagId ? `
-                        <div style="display: flex; gap: 8px;">
-                            <button class="btn btn-secondary" style="flex: 1; padding: 8px; font-size: 13px; border-color: var(--success); color: var(--success);" onclick="abrirModalSaldar(${validTagId}, '${tagName.replace(/'/g, "\\'")}', ${deudaPendiente})">
-                                <i data-lucide="coins" style="width: 14px;"></i> Abonar / Saldar
-                            </button>
-                        </div>
+                        <button class="btn btn-secondary" style="width:100%; padding: 8px; font-size: 13px; border-color: var(--success); color: var(--success);" onclick="abrirModalSaldar(${validTagId}, '${tagName.replace(/'/g, "\\'")}', ${deudaPendiente})">
+                            <i data-lucide="coins" style="width: 14px;"></i> Abonar / Saldar
+                        </button>
                         ` : '<div style="font-size:11px; color:var(--warning);">Edita el historial y ponle etiqueta a este gasto para poder abonar.</div>'}
                     </div>
                 `;
             }
-        }
+
+            if (meDebenPendiente > 0) {
+                const itemsRecientes = gm.items.sort((a,b) => new Date(b.fecha) - new Date(a.fecha)).slice(0, 3);
+                bloqueHtml += `
+                    <div style="border-top: 1px dashed var(--border); padding-top: 10px; margin-top: 10px;">
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Me debe (sin préstamo)</div>
+                        <div class="num-font" style="font-size: 22px; color: var(--accent-primary); margin-bottom: 6px;">${formatMoney(meDebenPendiente)}</div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">
+                            ${itemsRecientes.map(d => `
+                                <div style="display:flex; justify-content:space-between; margin-bottom: 4px;">
+                                    <span>${formatDateForDisplay(d.fecha)} — ${d.descripcion}</span>
+                                    <strong>${formatMoney(d.monto - (d.abonado || 0))}</strong>
+                                </div>
+                            `).join('')}
+                        </div>
+                        ${validTagId ? `
+                        <button class="btn btn-secondary" style="width:100%; padding: 8px; font-size: 13px; border-color: var(--accent-primary); color: var(--accent-primary);" onclick="abrirModalCobrar(${validTagId}, '${tagName.replace(/'/g, "\\'")}', ${meDebenPendiente})">
+                            <i data-lucide="hand-coins" style="width: 14px;"></i> Cobrar
+                        </button>
+                        ` : ''}
+                    </div>
+                `;
+            }
+
+            bloqueHtml += `</div>`;
+            prestamosHtml += bloqueHtml;
+        });
 
         if (prestamosHtml === '') {
             dash.style.display = 'none';
@@ -1314,6 +1492,101 @@
         });
 
         closeModal('modal-saldar');
+        syncData();
+    }
+
+    // --- Función "Me deben" (sin préstamo) ---
+
+    function abrirModalNuevaDeuda() {
+        const catPrestado = appState.categorias.find(c => c.nombre.toLowerCase().includes("prestado"));
+        const select = document.getElementById('deuda-tag-id');
+        if (!catPrestado) {
+            alert("Necesitas tener la categoría 'Prestado' y al menos una etiqueta (persona) creada en Ajustes antes de usar esto.");
+            return;
+        }
+        const tags = appState.etiquetas.filter(t => t.catId === catPrestado.id);
+        if (tags.length === 0) {
+            alert("Primero crea una etiqueta (persona) en Ajustes, asignada a la categoría 'Prestado'.");
+            return;
+        }
+        select.innerHTML = tags.map(t => `<option value="${t.id}">${t.nombre}</option>`).join('');
+        document.getElementById('deuda-desc').value = '';
+        document.getElementById('deuda-monto').value = '';
+        openModal('modal-nueva-deuda');
+    }
+
+    function crearMeDeben() {
+        const tagId = parseInt(document.getElementById('deuda-tag-id').value);
+        const descripcion = document.getElementById('deuda-desc').value;
+        const monto = parseFloat(document.getElementById('deuda-monto').value);
+
+        if (isNaN(tagId)) return alert("Selecciona una persona.");
+        if (!descripcion) return alert("Escribe una descripción.");
+        if (!monto || monto <= 0) return alert("Ingresa un monto válido.");
+
+        // Este registro NO crea ninguna transacción: no afecta el saldo.
+        appState.meDeben.push({
+            id: Date.now(),
+            tagId: tagId,
+            descripcion: descripcion,
+            monto: monto,
+            abonado: 0,
+            fecha: new Date().toISOString()
+        });
+
+        closeModal('modal-nueva-deuda');
+        syncData();
+    }
+
+    function abrirModalCobrar(tagId, tagName, maxCobro) {
+        document.getElementById('cobrar-tag-id').value = tagId;
+        document.getElementById('cobrar-max').value = maxCobro;
+        document.getElementById('cobrar-desc').innerHTML = `Total pendiente de cobrar a <strong>${tagName}</strong>: <strong>${formatMoney(maxCobro)}</strong>`;
+        document.getElementById('cobrar-monto').value = maxCobro;
+        openModal('modal-cobrar');
+    }
+
+    function procesarCobrarMeDeben() {
+        const tagId = parseInt(document.getElementById('cobrar-tag-id').value);
+        const monto = parseFloat(document.getElementById('cobrar-monto').value);
+        const metodo = document.getElementById('cobrar-metodo').value;
+        const maxCobro = parseFloat(document.getElementById('cobrar-max').value);
+
+        if (!monto || monto <= 0) return alert("Ingresa un monto válido.");
+        if (monto > maxCobro) return alert("El cobro no puede ser mayor a la deuda pendiente.");
+
+        const catPrestado = appState.categorias.find(c => c.nombre.toLowerCase().includes("prestado"));
+        const tag = appState.etiquetas.find(t => t.id === tagId);
+
+        // Repartimos el pago entre los registros pendientes de esta persona, del más viejo al más nuevo.
+        let restante = monto;
+        const pendientes = appState.meDeben
+            .filter(d => d.tagId === tagId && (d.monto - (d.abonado || 0)) > 0)
+            .sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+
+        for (const d of pendientes) {
+            if (restante <= 0) break;
+            const pendienteItem = d.monto - (d.abonado || 0);
+            const aplicado = Math.min(pendienteItem, restante);
+            d.abonado = (d.abonado || 0) + aplicado;
+            restante -= aplicado;
+        }
+
+        // El dinero sí entra de verdad, así que aquí sí se crea la transacción de ingreso.
+        // Se marca con esCobroMeDeben para que no se mezcle con los préstamos reales.
+        appState.transacciones.push({
+            id: Date.now(),
+            fecha: new Date().toISOString(),
+            descripcion: monto === maxCobro ? `Cobro total (me debían): ${tag.nombre}` : `Cobro parcial (me debían): ${tag.nombre}`,
+            tipo: 'Ingreso',
+            catId: catPrestado.id,
+            tagIds: [tag.id],
+            monto: monto,
+            metodo: metodo,
+            esCobroMeDeben: true
+        });
+
+        closeModal('modal-cobrar');
         syncData();
     }
 
@@ -2018,6 +2291,33 @@
         syncData();
     }
 
+    function addCuenta() {
+        const nombre = document.getElementById('new-cuenta-name').value;
+        const tipo = document.getElementById('new-cuenta-tipo').value;
+        if(!nombre) return alert("Ponle un nombre a la cuenta.");
+        if (appState.cuentas.some(c => c.nombre.toLowerCase() === nombre.toLowerCase())) {
+            return alert("Ya existe una cuenta con ese nombre.");
+        }
+        appState.cuentas.push({ id: Date.now(), nombre, tipo });
+        document.getElementById('new-cuenta-name').value = '';
+        syncData();
+    }
+
+    function deleteCuenta(id) {
+        if(confirm("Esto solo elimina la cuenta de la lista. Los movimientos que ya tenga asignados no se borran ni cambian de tipo (Efectivo/Digital). ¿Continuar?")) {
+            appState.cuentas = appState.cuentas.filter(c => c.id !== id);
+            syncData();
+        }
+    }
+
+    function toggleCuentaBreakdown(tipo) {
+        const el = document.getElementById(tipo === 'Efectivo' ? 'breakdown-efectivo' : 'breakdown-digital');
+        const chev = document.getElementById(tipo === 'Efectivo' ? 'chevron-efectivo' : 'chevron-digital');
+        const abierto = el.style.display !== 'none';
+        el.style.display = abierto ? 'none' : 'block';
+        chev.style.transform = abierto ? 'rotate(0deg)' : 'rotate(180deg)';
+    }
+
     function renderAjustes() {
         const cList = document.getElementById('settings-cat-list');
         cList.innerHTML = appState.categorias.map(c => `
@@ -2039,6 +2339,14 @@
                 </div>
             `;
         }).join('');
+
+        const cuList = document.getElementById('settings-cuentas-list');
+        cuList.innerHTML = appState.cuentas.map(c => `
+            <div class="tag-pill" style="border-left: 3px solid ${c.tipo === 'Efectivo' ? 'var(--success)' : 'var(--accent-primary)'}">
+                <span>${c.tipo === 'Efectivo' ? '💵' : '💳'}</span> ${c.nombre}
+                <i data-lucide="x" style="width:12px;cursor:pointer;margin-left:5px;color:var(--danger)" onclick="deleteCuenta(${c.id})"></i>
+            </div>
+        `).join('') || '<span style="color:var(--text-muted); font-size: 13px;">Sin cuentas creadas todavía</span>';
     }
 
     function populateSelects() {
@@ -2055,6 +2363,22 @@
             }
         });
         updateTagsSelect('tx-cat', 'tx-tag-container');
+
+        // Agregamos las cuentas personalizadas (Billetera, Caja fuerte, Bancolombia, etc.)
+        // como opciones extra en los selectores de método de pago, sin quitar las que ya existían.
+        const metodoSelects = ['tx-metodo', 'saldar-metodo', 'cobrar-metodo'];
+        metodoSelects.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.querySelectorAll('option[data-cuenta]').forEach(opt => opt.remove());
+            appState.cuentas.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.nombre;
+                opt.textContent = `${c.tipo === 'Efectivo' ? '💵' : '💳'} ${c.nombre}`;
+                opt.setAttribute('data-cuenta', '1');
+                el.appendChild(opt);
+            });
+        });
     }
 
     function updateTagsSelect(catElId, containerId, selectedIds = []) {
