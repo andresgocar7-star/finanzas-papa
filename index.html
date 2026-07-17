@@ -128,6 +128,31 @@
         .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
         .section-title { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
 
+        /* Análisis Visual (pestaña Resumen) */
+        .analisis-pills { display: flex; gap: 8px; margin-bottom: 18px; }
+        .analisis-pill { padding: 9px 20px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg-tertiary); color: var(--text-secondary); font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.25s; }
+        .analisis-pill:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
+        .analisis-pill.active { background: var(--accent-primary); border-color: var(--accent-primary); color: white; box-shadow: 0 4px 15px rgba(74, 158, 255, 0.3); }
+
+        .analisis-nav { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 26px; position: relative; }
+        .analisis-nav-btn { width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-tertiary); color: var(--text-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .analisis-nav-btn:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
+        .analisis-fecha-label { font-size: 14px; font-weight: 600; color: var(--text-secondary); cursor: pointer; padding: 4px 8px; border-radius: 8px; text-decoration: underline dotted; text-underline-offset: 4px; min-width: 200px; text-align: center; }
+        .analisis-fecha-label:hover { color: var(--accent-primary); background: var(--bg-tertiary); }
+
+        .analisis-cards { display: flex; justify-content: center; gap: 34px; margin-bottom: 24px; flex-wrap: wrap; }
+        .analisis-tipo-box { text-align: center; transition: transform 0.35s ease; transform: scale(1); }
+        .analisis-tipo-box.clickable { cursor: pointer; }
+        .analisis-tipo-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px; }
+        .analisis-tipo-num { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 24px; transition: font-size 0.35s ease; }
+
+        .analisis-barras { display: flex; flex-direction: column; gap: 14px; }
+        .analisis-bar-row { animation: fadeIn 0.3s ease; }
+        .analisis-bar-top { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+        .analisis-bar-track { background: var(--bg-tertiary); border-radius: 6px; height: 10px; overflow: hidden; }
+        .analisis-bar-fill { height: 100%; border-radius: 6px; transition: width 0.4s ease; }
+        .analisis-empty { text-align: center; color: var(--text-muted); font-size: 13px; padding: 30px 0; }
+
         /* Botón Épico para Backup */
         .btn-glow {
             background: linear-gradient(45deg, #ff0f7b, #f89b29);
@@ -629,6 +654,29 @@
     </div>
 
     <div id="tab-resumen" class="tab-content">
+        <div class="glass-panel">
+            <div class="section-header">
+                <h2 class="section-title"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="bar-chart-3" aria-hidden="true" class="lucide lucide-bar-chart-3"><path d="M3 3v16a2 2 0 0 0 2 2h16"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg> Análisis Visual</h2>
+            </div>
+
+            <div class="analisis-pills">
+                <button class="analisis-pill active" id="analisis-pill-dia" onclick="cambiarPeriodoAnalisis('dia')">Día</button>
+                <button class="analisis-pill" id="analisis-pill-semana" onclick="cambiarPeriodoAnalisis('semana')">Semana</button>
+                <button class="analisis-pill" id="analisis-pill-mes" onclick="cambiarPeriodoAnalisis('mes')">Mes</button>
+            </div>
+
+            <div class="analisis-nav">
+                <button class="analisis-nav-btn" onclick="moverAnalisisPeriodo(-1)" aria-label="Período anterior"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg></button>
+                <span class="analisis-fecha-label" id="analisis-fecha-label" onclick="abrirSelectorFechaAnalisis()"></span>
+                <button class="analisis-nav-btn" onclick="moverAnalisisPeriodo(1)" aria-label="Período siguiente"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg></button>
+                <input type="date" id="analisis-date-picker" style="position:absolute; opacity:0; pointer-events:none; width:0; height:0;" onchange="fechaAnalisisSeleccionada(event)">
+            </div>
+
+            <div class="analisis-cards" id="analisis-cards"></div>
+
+            <div class="analisis-barras" id="analisis-barras"></div>
+        </div>
+
         <div class="summary-grid" id="summary-cards-container"></div>
 
         <div class="glass-panel">
@@ -1253,6 +1301,7 @@
         renderPresupuestos();
         renderMetas();
         renderResumen();
+        renderAnalisisVisual();
         renderAjustes();
         lucide.createIcons();
     }
@@ -2074,6 +2123,179 @@
         closeModal('modal-edit-aporte');
         renderHistorialAportesEdicion(metaId);
         syncData();
+    }
+
+    // --- Análisis Visual (pestaña Resumen) ---
+    // Estado propio de esta vista: NO vive dentro de appState a propósito,
+    // para que no se guarde ni se sincronice entre dispositivos (es solo de navegación).
+    let analisisState = { periodo: 'dia', fecha: new Date(), tipo: 'Gasto' };
+
+    function capitalizar(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+    function toISODateLocal(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    }
+
+    function getRangoFechasAnalisis() {
+        const periodo = analisisState.periodo;
+        const base = new Date(analisisState.fecha);
+        base.setHours(12, 0, 0, 0);
+
+        const diasSemana = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+        const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+
+        if (periodo === 'dia') {
+            const start = new Date(base); start.setHours(0, 0, 0, 0);
+            const end = new Date(base); end.setHours(23, 59, 59, 999);
+            const label = `${capitalizar(diasSemana[base.getDay()])} ${base.getDate()} de ${meses[base.getMonth()]}`;
+            return { start, end, label };
+        }
+
+        if (periodo === 'semana') {
+            const dow = base.getDay();
+            const diffLunes = dow === 0 ? -6 : 1 - dow;
+            const lunes = new Date(base); lunes.setDate(base.getDate() + diffLunes); lunes.setHours(0, 0, 0, 0);
+            const domingo = new Date(lunes); domingo.setDate(lunes.getDate() + 6); domingo.setHours(23, 59, 59, 999);
+            const label = (lunes.getMonth() === domingo.getMonth())
+                ? `${lunes.getDate()} – ${domingo.getDate()} de ${meses[lunes.getMonth()]}`
+                : `${lunes.getDate()} de ${meses[lunes.getMonth()]} – ${domingo.getDate()} de ${meses[domingo.getMonth()]}`;
+            return { start: lunes, end: domingo, label };
+        }
+
+        // mes
+        const start = new Date(base.getFullYear(), base.getMonth(), 1, 0, 0, 0, 0);
+        const end = new Date(base.getFullYear(), base.getMonth() + 1, 0, 23, 59, 59, 999);
+        const label = `${capitalizar(meses[base.getMonth()])} ${base.getFullYear()}`;
+        return { start, end, label };
+    }
+
+    function cambiarPeriodoAnalisis(p) {
+        analisisState.periodo = p;
+        document.querySelectorAll('.analisis-pill').forEach(b => b.classList.remove('active'));
+        document.getElementById('analisis-pill-' + p).classList.add('active');
+        renderAnalisisVisual();
+    }
+
+    function moverAnalisisPeriodo(dir) {
+        const f = new Date(analisisState.fecha);
+        if (analisisState.periodo === 'dia') f.setDate(f.getDate() + dir);
+        else if (analisisState.periodo === 'semana') f.setDate(f.getDate() + dir * 7);
+        else f.setMonth(f.getMonth() + dir);
+        analisisState.fecha = f;
+        renderAnalisisVisual();
+    }
+
+    function abrirSelectorFechaAnalisis() {
+        const input = document.getElementById('analisis-date-picker');
+        input.value = toISODateLocal(analisisState.fecha);
+        if (input.showPicker) { try { input.showPicker(); } catch (e) { input.click(); } }
+        else { input.click(); }
+    }
+
+    function fechaAnalisisSeleccionada(event) {
+        const val = event.target.value;
+        if (!val) return;
+        analisisState.fecha = parseDateLocal(val);
+        renderAnalisisVisual();
+    }
+
+    function seleccionarTipoAnalisis(tipo) {
+        analisisState.tipo = tipo;
+        renderAnalisisVisual();
+    }
+
+    function aplicarEstiloTipoAnalisis() {
+        const numGasto = document.getElementById('analisis-num-gasto');
+        const numIngreso = document.getElementById('analisis-num-ingreso');
+        const boxGasto = document.getElementById('analisis-box-gasto');
+        const boxIngreso = document.getElementById('analisis-box-ingreso');
+        if (!numGasto || !numIngreso) return;
+        const activo = analisisState.tipo;
+        numGasto.style.fontSize = activo === 'Gasto' ? '34px' : '18px';
+        numIngreso.style.fontSize = activo === 'Ingreso' ? '34px' : '18px';
+        boxGasto.style.transform = activo === 'Gasto' ? 'scale(1)' : 'scale(0.92)';
+        boxIngreso.style.transform = activo === 'Ingreso' ? 'scale(1)' : 'scale(0.92)';
+    }
+
+    function renderAnalisisBarras(txsPeriodo, tipo, vacio) {
+        const cont = document.getElementById('analisis-barras');
+        if (vacio) { cont.innerHTML = ''; return; }
+
+        const mapa = {};
+        txsPeriodo.filter(t => t.tipo === tipo).forEach(t => {
+            mapa[t.catId] = (mapa[t.catId] || 0) + t.monto;
+        });
+        const items = Object.entries(mapa).map(([catId, monto]) => {
+            const c = appState.categorias.find(x => x.id == catId);
+            return { nombre: c ? c.nombre : 'Sin categoría', emoji: c ? c.emoji : '📦', monto };
+        }).sort((a, b) => b.monto - a.monto);
+
+        if (items.length === 0) {
+            cont.innerHTML = `<div class="analisis-empty">Sin ${tipo === 'Gasto' ? 'gastos' : 'ingresos'} en este período</div>`;
+            return;
+        }
+
+        const max = items[0].monto;
+        const colorVar = tipo === 'Gasto' ? 'var(--danger)' : 'var(--success)';
+
+        cont.innerHTML = items.map(it => `
+            <div class="analisis-bar-row">
+                <div class="analisis-bar-top">
+                    <span>${it.emoji} ${it.nombre}</span>
+                    <span class="num-font">${formatMoney(it.monto)}</span>
+                </div>
+                <div class="analisis-bar-track">
+                    <div class="analisis-bar-fill" style="width:${(it.monto / max * 100).toFixed(1)}%; background:${colorVar};"></div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function renderAnalisisVisual() {
+        const rango = getRangoFechasAnalisis();
+        document.getElementById('analisis-fecha-label').innerText = rango.label;
+
+        const txsPeriodo = appState.transacciones.filter(t => {
+            if (isCategoriaCorrecion(t.catId)) return false;
+            const d = new Date(t.fecha);
+            return d >= rango.start && d <= rango.end;
+        });
+
+        const totalGasto = txsPeriodo.filter(t => t.tipo === 'Gasto').reduce((s, t) => s + t.monto, 0);
+        const totalIngreso = txsPeriodo.filter(t => t.tipo === 'Ingreso').reduce((s, t) => s + t.monto, 0);
+
+        let tipoParaBarras = analisisState.tipo;
+        if (tipoParaBarras === 'Gasto' && totalGasto === 0 && totalIngreso > 0) tipoParaBarras = 'Ingreso';
+        if (tipoParaBarras === 'Ingreso' && totalIngreso === 0 && totalGasto > 0) tipoParaBarras = 'Gasto';
+
+        const cardsWrap = document.getElementById('analisis-cards');
+        const vacio = totalGasto === 0 && totalIngreso === 0;
+        const ambosPresentes = totalGasto > 0 && totalIngreso > 0;
+
+        if (vacio) {
+            cardsWrap.innerHTML = '<div class="analisis-empty">Sin movimientos registrados en este período</div>';
+        } else {
+            let html = '';
+            if (totalGasto > 0) {
+                html += `<div class="analisis-tipo-box ${ambosPresentes ? 'clickable' : ''}" id="analisis-box-gasto" ${ambosPresentes ? `onclick="seleccionarTipoAnalisis('Gasto')"` : ''}>
+                    <div class="analisis-tipo-label" style="color:var(--danger)">Gastos</div>
+                    <div class="analisis-tipo-num" id="analisis-num-gasto" style="color:var(--danger); font-size:${ambosPresentes ? '24px' : '30px'};">${formatMoney(totalGasto)}</div>
+                </div>`;
+            }
+            if (totalIngreso > 0) {
+                html += `<div class="analisis-tipo-box ${ambosPresentes ? 'clickable' : ''}" id="analisis-box-ingreso" ${ambosPresentes ? `onclick="seleccionarTipoAnalisis('Ingreso')"` : ''}>
+                    <div class="analisis-tipo-label" style="color:var(--success)">Ingresos</div>
+                    <div class="analisis-tipo-num" id="analisis-num-ingreso" style="color:var(--success); font-size:${ambosPresentes ? '24px' : '30px'};">${formatMoney(totalIngreso)}</div>
+                </div>`;
+            }
+            cardsWrap.innerHTML = html;
+            if (ambosPresentes) requestAnimationFrame(aplicarEstiloTipoAnalisis);
+        }
+
+        renderAnalisisBarras(txsPeriodo, tipoParaBarras, vacio);
     }
 
     function renderResumen() {
